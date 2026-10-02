@@ -4,31 +4,31 @@ using System.Text.RegularExpressions;
 using Spectre.Console;
 
 // ****************************** Förslag till visualisering av PHuset ***************************************//
-//AnsiConsole.MarkupLine("[red bold]Bar Chart[/]");
-//AnsiConsole.Write(new BarChart()
-//    .Label("[green]Sales by Region[/]")
-//    .AddItem("North", 1, Spectre.Console.Color.Blue)
-//    .AddItem("South", 2, Spectre.Console.Color.Yellow)
-//    .AddItem("West", 1, Spectre.Console.Color.Green));
+AnsiConsole.MarkupLine("[red bold]Bar Chart[/]");
+AnsiConsole.Write(new BarChart()
+    .Label("[green]Sales by Region[/]")
+    .AddItem("North", 1, Spectre.Console.Color.Blue)
+    .AddItem("South", 2, Spectre.Console.Color.Yellow)
+    .AddItem("West", 1, Spectre.Console.Color.Green));
 
-//AnsiConsole.MarkupLine("[red bold]Breakdown Chart[/]");
-//AnsiConsole.Write(new BreakdownChart()
-//    .AddItem("C#", 1, Spectre.Console.Color.Green)
-//    .AddItem("TypeScript", 1, Spectre.Console.Color.Blue)
-//    .AddItem("Python", 1, Spectre.Console.Color.Yellow));
+AnsiConsole.MarkupLine("[red bold]Breakdown Chart[/]");
+AnsiConsole.Write(new BreakdownChart()
+    .AddItem("C#", 1, Spectre.Console.Color.Green)
+    .AddItem("TypeScript", 1, Spectre.Console.Color.Blue)
+    .AddItem("Python", 1, Spectre.Console.Color.Yellow));
 
 
-//var table = new Table();
+var table = new Table();
 
-//table.AddColumn("Name");
-//table.AddColumn("Department");
-//table.AddColumn("Sales");
+table.AddColumn("Name");
+table.AddColumn("Department");
+table.AddColumn("Sales");
 
-//table.AddRow("[blue on white]Bar Chart[/]", "North", "$12,400");
-//table.AddRow("Bob", "South", "$8,750");
-//table.AddRow("Carol", "West", "$15,200");
+table.AddRow("[blue on white]Bar Chart[/]", "North", "$12,400");
+table.AddRow("Bob", "South", "$8,750");
+table.AddRow("Carol", "West", "$15,200");
 
-//AnsiConsole.Write(table);
+AnsiConsole.Write(table);
 // ************************************************************************************************************//
 
 string[] parkingGarage = new string[100];
@@ -137,9 +137,26 @@ parkingGarage[99] = "BIL#TOH166";
 #endregion
 
 
-menyVal(menyDisplay());
+//menyVal(menyDisplay());
+
 
 // ****************************** METODER ***************************************//
+void hittaTommaPlatser()
+{
+    List<int> tommaPlatser = new List<int>();
+    for (int i = 0; i < parkingGarage.Length; i++)
+    {
+        if (string.IsNullOrEmpty(parkingGarage[i])) // Kollar om p-plats [i] är tom. Detta för att undvika null krashar.
+        {
+            tommaPlatser.Add(i);
+        }
+    }
+    Console.Write("Tomma p-platser: ");
+    foreach (var plats in tommaPlatser)
+    {
+        Console.Write(plats + "; ");
+    }
+}
 void optimeraMcParkering()
 {
     int counter = 0;
@@ -180,9 +197,16 @@ void flyttaFordon()
     else
     {
         int platsIndex = angePPlats();
-        Console.WriteLine($"Fordon {input} står på plats {i + 1}, och flyttas nu till p-plats {platsIndex + 1}");
 
-        if (Regex.IsMatch(parkingGarage[i], "^[^|]*$")) //Om p-platsen inte innehåller 2 st MC
+        if (!string.IsNullOrEmpty(parkingGarage[platsIndex]))
+        {
+            Console.WriteLine("Tyvärr är den angivna p-plasten upptagen, försök igen.");
+            hittaTommaPlatser();
+            Console.WriteLine();
+            platsIndex = angePPlats();
+        }
+
+        else if (Regex.IsMatch(parkingGarage[i], "^[^|]*$")) //Om p-platsen inte innehåller 2 st MC
         {
             parkingGarage[platsIndex] = parkingGarage[i];
             parkingGarage[i] = "";
@@ -203,6 +227,7 @@ void flyttaFordon()
                 }
             }
         }
+        Console.WriteLine($"Fordon {input} står på plats {i + 1}, och flyttas nu till p-plats {platsIndex + 1}");
     }
     Console.WriteLine();
     Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
@@ -219,7 +244,7 @@ int angePPlats()
         Console.WriteLine();
         angePPlats();
     }
-    if (platsIndex > parkingGarage.Length - 1)
+    if (platsIndex > parkingGarage.Length)
     {
         Console.WriteLine($"Du angav inte en p-plats som finns i systemet, p-huset har parkingsplatser från 1 till {parkingGarage.Length}, ange en siffra inom det spannet.");
         Console.WriteLine();
@@ -333,7 +358,6 @@ void parkeraMc(string[] fordonID)
             {
                 parkingGarage[i] = parkingGarage[i] + "|" + fordonID[0] + "#" + fordonID[1];
                 Console.WriteLine($"Mc med regnr {fordonID[1]} är parkerad på plats nr {i + 1}");
-                Console.WriteLine($"Hela p-platsen id är {parkingGarage[i]}");
                 break;
             }
         }
