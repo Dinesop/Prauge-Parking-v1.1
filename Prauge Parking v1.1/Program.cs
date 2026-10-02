@@ -4,31 +4,20 @@ using System.Text.RegularExpressions;
 using Spectre.Console;
 
 // ****************************** Förslag till visualisering av PHuset ***************************************//
-AnsiConsole.MarkupLine("[red bold]Bar Chart[/]");
-AnsiConsole.Write(new BarChart()
-    .Label("[green]Sales by Region[/]")
-    .AddItem("North", 1, Spectre.Console.Color.Blue)
-    .AddItem("South", 2, Spectre.Console.Color.Yellow)
-    .AddItem("West", 1, Spectre.Console.Color.Green));
+//AnsiConsole.MarkupLine("[red bold]Bar Chart[/]");
+//AnsiConsole.Write(new BarChart()
+//    .Label("[green]Sales by Region[/]")
+//    .AddItem("North", 1, Spectre.Console.Color.Blue)
+//    .AddItem("South", 2, Spectre.Console.Color.Yellow)
+//    .AddItem("West", 1, Spectre.Console.Color.Green));
 
-AnsiConsole.MarkupLine("[red bold]Breakdown Chart[/]");
-AnsiConsole.Write(new BreakdownChart()
-    .AddItem("C#", 1, Spectre.Console.Color.Green)
-    .AddItem("TypeScript", 1, Spectre.Console.Color.Blue)
-    .AddItem("Python", 1, Spectre.Console.Color.Yellow));
+//AnsiConsole.MarkupLine("[red bold]Breakdown Chart[/]");
+//AnsiConsole.Write(new BreakdownChart()
+//    .AddItem("C#", 1, Spectre.Console.Color.Green)
+//    .AddItem("TypeScript", 1, Spectre.Console.Color.Blue)
+//    .AddItem("Python", 1, Spectre.Console.Color.Yellow));
 
 
-var table = new Table();
-
-table.AddColumn("Name");
-table.AddColumn("Department");
-table.AddColumn("Sales");
-
-table.AddRow("[blue on white]Bar Chart[/]", "North", "$12,400");
-table.AddRow("Bob", "South", "$8,750");
-table.AddRow("Carol", "West", "$15,200");
-
-AnsiConsole.Write(table);
 // ************************************************************************************************************//
 
 string[] parkingGarage = new string[100];
@@ -139,6 +128,56 @@ parkingGarage[99] = "BIL#TOH166";
 
 //menyVal(menyDisplay());
 
+// Initiate table
+var table = new Table()
+    .RoundedBorder()
+    .ShowRowSeparators()
+    .BorderColor(Spectre.Console.Color.Grey)
+    .Title("[bold]Parkeringshuset[/]");
+
+table.AddColumn("1", col => col.Centered());
+table.AddColumn("2", col => col.Centered());
+
+table.AddColumn("3", col => col.Centered());
+table.AddColumn("4", col => col.Centered());
+
+table.AddColumn("5", col => col.Centered());
+table.AddColumn("6", col => col.Centered());
+
+table.AddColumn("7", col => col.Centered());
+table.AddColumn("8", col => col.Centered());
+
+table.AddColumn("9", col => col.Centered());
+table.AddColumn("10", col => col.Centered());
+
+
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+table.AddRow("", "", "", "", "", "", "", "", "", "");
+
+// Update cells dynamically
+int index = 0;
+for(int row = 0; row < 10; row++)
+{
+    for(int col = 0; col < 10; col++)
+    {
+        table.UpdateCell(row, col, new Markup($"[on white]{parkingGarage[index]}[/]"));
+        index++;
+    }
+}
+
+AnsiConsole.Write(table);
 
 // ****************************** METODER ***************************************//
 void hittaTommaPlatser()
