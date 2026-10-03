@@ -1,24 +1,9 @@
-﻿using System.Drawing;
+﻿using Spectre.Console;
+using System.Diagnostics.Metrics;
+using System.Drawing;
+using System.Net.NetworkInformation;
 using System.Numerics;
 using System.Text.RegularExpressions;
-using Spectre.Console;
-
-// ****************************** Förslag till visualisering av PHuset ***************************************//
-//AnsiConsole.MarkupLine("[red bold]Bar Chart[/]");
-//AnsiConsole.Write(new BarChart()
-//    .Label("[green]Sales by Region[/]")
-//    .AddItem("North", 1, Spectre.Console.Color.Blue)
-//    .AddItem("South", 2, Spectre.Console.Color.Yellow)
-//    .AddItem("West", 1, Spectre.Console.Color.Green));
-
-//AnsiConsole.MarkupLine("[red bold]Breakdown Chart[/]");
-//AnsiConsole.Write(new BreakdownChart()
-//    .AddItem("C#", 1, Spectre.Console.Color.Green)
-//    .AddItem("TypeScript", 1, Spectre.Console.Color.Blue)
-//    .AddItem("Python", 1, Spectre.Console.Color.Yellow));
-
-
-// ************************************************************************************************************//
 
 string[] parkingGarage = new string[100];
 
@@ -126,60 +111,118 @@ parkingGarage[99] = "BIL#TOH166";
 #endregion
 
 
-//menyVal(menyDisplay());
+menyVal(menyDisplay());
 
-// Initiate table
-var table = new Table()
+
+// ****************************** METODER ***************************************//
+void beläggningsrapport(int[] beläggning)
+{
+    Console.WriteLine("Beläggningsrapport");
+    Console.WriteLine($"Antal fulla p-platser: {beläggning[2]} \n Antal halvfulla p-platser: {beläggning[1]} \n Antal tomma p-platser: {beläggning[0]}");
+    if (beläggning[2] != 0)
+    {
+        Console.WriteLine("Det finns MCs som står singelparkerade, tryck Enter för att köra Optimera MC parkering, annars tryck på valfri tangent (utom Enter) för att återgå till huvudmenyn.\n");
+        var knapp = Console.ReadKey(false);
+        if (knapp.Key == ConsoleKey.Enter)
+        {
+            optimeraMcParkering();
+        }
+
+        else
+        {
+            Console.ReadKey();
+            menyVal(menyDisplay());
+        }
+
+
+    }
+    else
+    {
+        Console.WriteLine();
+        Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
+        Console.ReadKey();
+
+        menyVal(menyDisplay());
+    }
+}
+int[] beläggningsKoll()
+{
+    int[] beläggning = { 0, 0, 0 };
+
+    for (int i = 0; i < parkingGarage.Length; i++)
+    {
+        if (string.IsNullOrEmpty(parkingGarage[i])) // Kollar om p-plats [i] är tom. Detta för att undvika null krashar.
+        {
+            beläggning[0]++;
+        }
+        else if (parkingGarage[i].Contains("MC") && Regex.IsMatch(parkingGarage[i], "^[^|]*$")) //Kollar om p-plats [i] innehåller endast en MC
+        {
+            beläggning[1]++;
+        }
+        else
+        {
+            beläggning[2]++;
+        }
+    }
+    return (beläggning);
+}
+void visualiseraPhus()
+{
+    // Declare variables
+    int index = 0;
+
+    // Setup table
+    var table = new Table()
     .RoundedBorder()
     .ShowRowSeparators()
     .BorderColor(Spectre.Console.Color.Grey)
     .Title("[bold]Parkeringshuset[/]");
 
-table.AddColumn("1", col => col.Centered());
-table.AddColumn("2", col => col.Centered());
-
-table.AddColumn("3", col => col.Centered());
-table.AddColumn("4", col => col.Centered());
-
-table.AddColumn("5", col => col.Centered());
-table.AddColumn("6", col => col.Centered());
-
-table.AddColumn("7", col => col.Centered());
-table.AddColumn("8", col => col.Centered());
-
-table.AddColumn("9", col => col.Centered());
-table.AddColumn("10", col => col.Centered());
-
-
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-table.AddRow("", "", "", "", "", "", "", "", "", "");
-
-// Update cells dynamically
-int index = 0;
-for(int row = 0; row < 10; row++)
-{
-    for(int col = 0; col < 10; col++)
+    // Setup columns
+    for (int colSetup = 0; colSetup < 10; colSetup++)
     {
-        table.UpdateCell(row, col, new Markup($"[on white]{parkingGarage[index]}[/]"));
-        index++;
+        table.AddColumn($"{colSetup + 1}");
     }
+
+    // Setup rows
+    for (int rowSetup = 0; rowSetup < 10; rowSetup++)
+    {
+        table.AddRow("", "", "", "", "", "", "", "", "", "");
+    }
+
+    // Fill table with barcharts indicating if the parking spot is empty, half-full or full. 
+    for (int row = 0; row < 10; row++)
+    {
+        for (int col = 0; col < 10; col++)
+        {
+            // Checks if parking spot contains only one MC.
+            if (parkingGarage[index].Contains("MC") && Regex.IsMatch(parkingGarage[index], "^[^|]*$"))
+            {
+                table.UpdateCell(row, col, new BarChart()
+                .HideValues()
+                .AddItem($"", 1, Spectre.Console.Color.Yellow));
+            }
+            // Checks if parking spot contains one car or two MCs.
+            else if (parkingGarage[index].Contains("BIL") || parkingGarage[index].Contains("|"))
+            {
+                table.UpdateCell(row, col, new BarChart()
+                 .HideValues()
+                 .AddItem($"", 1, Spectre.Console.Color.Green)
+                 .AddItem($"", 1, Spectre.Console.Color.Green));
+            }
+            // Sets the empty parkingspot to empty.
+            else
+            {
+                table.UpdateCell(row, col, new Markup($" "));
+            }
+
+            index++;
+
+        }
+    }
+    // Writes out the table in the console
+    AnsiConsole.Write(table);
 }
-
-AnsiConsole.Write(table);
-
-// ****************************** METODER ***************************************//
 void hittaTommaPlatser()
 {
     List<int> tommaPlatser = new List<int>();
@@ -445,7 +488,7 @@ void läggaTillFordon()
 
     Console.WriteLine();
     Console.WriteLine("Ange fordonstyp följt av registrering nummret på formen BIL#ABC123 alt. MC#ABC123:");
-    string fordonInput = Console.ReadLine().ToUpper().Trim(); 
+    string fordonInput = Console.ReadLine().ToUpper().Trim();
     if (!fordonInput.Contains("#") || !fordonInput.Contains("BIL") && !fordonInput.Contains("MC"))
     {
         Console.WriteLine("Var god mata in fordonet i formatet: BIL#ABC123 alt. MC#ABC123");
@@ -491,6 +534,12 @@ void menyVal(int valdMenyPunkt)
         case 5:
             optimeraMcParkering();
             break;
+
+        case 6:
+            visualiseraPhus();
+            int[] beläggning = beläggningsKoll();
+            beläggningsrapport(beläggning);
+            break;
     }
 }
 int menyDisplay()
@@ -508,9 +557,10 @@ int menyDisplay()
         Console.WriteLine(valdMenyPunkt == 3 ? "> Hämta fordon" : "  Hämta fordon");
         Console.WriteLine(valdMenyPunkt == 4 ? "> Sök efter fordon" : "  Sök efter fordon");
         Console.WriteLine(valdMenyPunkt == 5 ? "> Optimera MC parkering" : "  Optimera MC parkering");
+        Console.WriteLine(valdMenyPunkt == 6 ? "> Parkeringshus översikt" : "  Parkeringshus översikt");
 
         var knapp = Console.ReadKey(false);
-        if (knapp.Key == ConsoleKey.DownArrow && valdMenyPunkt < 5) valdMenyPunkt++;
+        if (knapp.Key == ConsoleKey.DownArrow && valdMenyPunkt < 6) valdMenyPunkt++;
 
 
         else if (knapp.Key == ConsoleKey.UpArrow && valdMenyPunkt > 1) valdMenyPunkt--;
