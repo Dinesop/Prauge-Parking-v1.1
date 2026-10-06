@@ -112,75 +112,92 @@ parkingGarage[98] = "BIL#OQX801#2026-10-05 03:26:19";
 parkingGarage[99] = "BIL#TOH166#2026-10-05 19:14:50";
 #endregion
 
+//string a = "\u2649";
 
 
-
-
-int index = 0;
-
-// Tabell setup
-var table = new Table()
-.RoundedBorder()
-.ShowRowSeparators()
-.BorderColor(Spectre.Console.Color.Grey)
-.Title("[bold]Parkeringshuset[/]");
-
-// Kolumn setup
-for (int colSetup = 0; colSetup < 10; colSetup++)
-{
-    table.AddColumn($"{colSetup + 1}");
-}
-
-// Rad setup
-for (int rowSetup = 0; rowSetup < 10; rowSetup++)
-{
-    table.AddRow("", "", "", "", "", "", "", "", "", "");
-}
-
-// Fyll tabellen med stapeldiagram för att visa om p-platserna är fulla, halvfulla eller tomma. 
-for (int row = 0; row < 10; row++)
-{
-    for (int col = 0; col < 10; col++)
-    {
-        if (!string.IsNullOrEmpty(parkingGarage[index])) // Kollar om p-plats [i] är INTE är tom.
-        {
-            string[] fordonID = parkingGarage[index].Split('#');
-            table.UpdateCell(row, col, new Markup($"{fordonID[0]} {fordonID[1]}"));
-        }
-
-        else
-        {
-            table.UpdateCell(row, col, new Markup($" "));
-        }
-        index++;
-    }
-}
-// Skriver ut tabellen i konsolfönstret
-AnsiConsole.Write(table);
-
-
-
-
-
-
-
-//Console.WriteLine("Tryck Enter för att växla mellan färgkodade platser eller utskift av befintliga fordon eller tryck annan valfri tangent för att fortsätta.");
-//var knapp = Console.ReadKey(false);
-//if (knapp.Key == ConsoleKey.Enter)
-//{
-//    Console.WriteLine();
-//    optimeraMcParkering();
-//}
-
-//else
-//{
-//    Console.ReadKey();
-//    menyVal(menyDisplay());
-//}
+Console.WriteLine(a);
 
 //menyVal(menyDisplay());
 
 // ****************************** METODER ***************************************//
+void visualiseraPhusText()
+{
+
+    Console.Clear();
+    int width = 160;
+    int height = Console.WindowHeight;
+    Console.SetBufferSize(width, height);
+    Console.SetWindowSize(width, height);
+
+    int index = 0;
+
+    // Tabell setup
+    var table = new Table()
+    .RoundedBorder()
+    .ShowRowSeparators()
+    .BorderColor(Spectre.Console.Color.Grey)
+    .Title("[bold]Parkeringshuset[/]");
+
+    // Kolumn setup
+    for (int colSetup = 0; colSetup < 10; colSetup++)
+    {
+        //table.AddColumn($"{colSetup + 1}");
+        table.AddColumn($"{colSetup + 1}", col => col.Width(100));// .PadLeft(1).PadRight(1)
+    }
+
+    // Rad setup
+    for (int rowSetup = 0; rowSetup < 10; rowSetup++)
+    {
+        table.AddRow("", "", "", "", "", "", "", "", "", "");
+    }
+
+    // Fyll tabellen med stapeldiagram för att visa om p-platserna är fulla, halvfulla eller tomma. 
+
+    for (int row = 0; row < 10; row++)
+    {
+        for (int col = 0; col < 10; col++)
+        {
+            if (parkingGarage[index].Contains("|"))
+            {
+                string[] mcParking = parkingGarage[index].Split('|');
+                string[] mcID1 = mcParking[0].Split('#');
+                string[] mcID2 = mcParking[0].Split('#');
+                table.UpdateCell(row, col, new Markup($"{mcID1[0]} {mcID1[1]} \n{mcID2[0]} {mcID2[1]}"));
+            }
+
+            else if (!string.IsNullOrEmpty(parkingGarage[index])) // Kollar om p-plats [i] är INTE är tom.
+            {
+                string[] fordonID = parkingGarage[index].Split('#');
+                table.UpdateCell(row, col, new Markup($"{fordonID[0]} {fordonID[1]}"));
+            }
+
+            else
+            {
+                table.UpdateCell(row, col, new Markup($" "));
+            }
+            index++;
+        }
+    }
+   
+    // Skriver ut tabellen i konsolfönstret
+    AnsiConsole.Write(table);
+
+    Console.WriteLine();
+    Console.WriteLine("Tryck Enter för att växla mellan färgkodade platser eller utskift av befintliga fordon eller tryck annan valfri tangent för att fortsätta.");
+    var knapp = Console.ReadKey(false);
+    if (knapp.Key == ConsoleKey.Enter)
+    {
+        Console.Clear();
+        visualiseraPhusFärg();
+    }
+
+    else
+    {
+        Console.ReadKey();
+        int[] beläggning = beläggningsKoll();
+        beläggningsrapport(beläggning);
+    }
+}
 void beläggningsrapport(int[] beläggning)
 { // Hanterar datan från beläggningskollen och skriver ut en enkel rapport. Om det finns singel parkerade MCs kan användaren direkt köra MC Optimeringsprogrammet. 
 
@@ -239,6 +256,11 @@ int[] beläggningsKoll()
 }
 void visualiseraPhusFärg()
 { // Skriver ut en tabell över p-huset med beläggningsstatus på varje plats.
+    Console.Clear();
+    int width = 160;
+    int height = Console.WindowHeight;
+    Console.SetBufferSize(width, height);
+    Console.SetWindowSize(width, height);
 
     int index = 0;
 
@@ -252,7 +274,8 @@ void visualiseraPhusFärg()
     // Kolumn setup
     for (int colSetup = 0; colSetup < 10; colSetup++)
     {
-        table.AddColumn($"{colSetup + 1}");
+        //table.AddColumn($"{colSetup + 1}");
+        table.AddColumn($"{colSetup + 1}", col => col.Width(100));// .PadLeft(1).PadRight(1)
     }
 
     // Rad setup
@@ -293,7 +316,22 @@ void visualiseraPhusFärg()
     }
     // Skriver ut tabellen i konsolfönstret
     AnsiConsole.Write(table);
-    
+
+    Console.WriteLine();
+    Console.WriteLine("Tryck Enter för att växla mellan färgkodade platser eller utskift av befintliga fordon eller tryck annan valfri tangent för att fortsätta.");
+    var knapp = Console.ReadKey(false);
+    if (knapp.Key == ConsoleKey.Enter)
+    {
+        visualiseraPhusText();
+    }
+
+    else
+    {
+        Console.ReadKey();
+        Console.WriteLine();
+        int[] beläggning = beläggningsKoll();
+        beläggningsrapport(beläggning);
+    }
 
 }
 void hittaTommaPlatser()
@@ -637,8 +675,7 @@ void menyVal(int valdMenyPunkt)
 
         case 6:
             visualiseraPhusFärg();
-            int[] beläggning = beläggningsKoll();
-            beläggningsrapport(beläggning);
+
             break;
     }
 }
