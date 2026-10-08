@@ -3,11 +3,12 @@ using System.Diagnostics.Metrics;
 using System.Drawing;
 using System.Net.NetworkInformation;
 using System.Numerics;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-string[] parkingGarage = new string[100];
+string[] parkingGarage = new string [100];
 
 # region parkerade bilar
 parkingGarage[0] = "BIL#AHF768#2026-10-05 18:24:12";
@@ -15,11 +16,11 @@ parkingGarage[1] = "MC#KAF501#2026-10-05 14:12:05";
 parkingGarage[2] = "BIL#OFP808#2026-10-05 20:45:30";
 parkingGarage[3] = "MC#IEY300#2026-10-05 11:33:18";
 parkingGarage[4] = "MC#PUS593#2026-10-05 19:15:40|MC#OVQ857#2026-10-05 19:15:40";
-parkingGarage[5] = "BIL#FHC212#2026-10-05 08:52:11";
+parkingGarage[5] = "BIL#ABC123#2026-10-05 08:52:11";
 parkingGarage[6] = "MC#JJF296#2026-10-05 17:04:55";
 parkingGarage[7] = "MC#10TEECKEEN#2026-10-05 13:41:22";
 parkingGarage[8] = "BIL#RVU203#2026-10-05 15:19:04";
-parkingGarage[9] = "BIL#FYW363#2026-10-05 20:02:18";
+parkingGarage[9] = "";
 parkingGarage[10] = "";
 parkingGarage[11] = "BIL#GGO258#2026-10-05 10:14:35";
 parkingGarage[12] = "BIL#FZN001#2026-10-05 16:38:50";
@@ -115,18 +116,79 @@ parkingGarage[99] = "BIL#TOH166#2026-10-05 19:14:50";
 //string a = "\u2649";
 
 
-Console.WriteLine(a);
+//Console.WriteLine(a);
 
-//menyVal(menyDisplay());
+menyVal(menyDisplay());
 
 // ****************************** METODER ***************************************//
+void menyVal4()
+{ // Kod snippet för menyval 4.
+
+    string input = taEmotRegNr();
+    List<int> i = genomsökaPhus(input);
+
+    if (i[0] == 1001)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Tyvärr finns inte fordonet i vårt system, kontrollera angivet registeringsnummer.");
+        menyVal4();
+    }
+    else if (i.Count > 1)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Det finns två bilar med det registreringsnumret du angav:");
+        foreach (var fordon in i)
+        {
+            Console.WriteLine(parkingGarage[fordon]);
+        }
+        Console.WriteLine();
+        Console.WriteLine("Var god specificera vilket av dom du eftersöker:");
+        menyVal4();
+    }
+    else
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Fordonet du söker står på plats {i[0] + 1}");
+    }
+
+    Console.WriteLine();
+    Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
+    Console.ReadKey();
+    menyVal(menyDisplay());
+}
+List<int> genomsökaPhus (string input)
+{
+    List<int> pIndex = new List<int>();
+    for (int i = 0; i < parkingGarage.Length; i++)
+    {
+        if (string.IsNullOrEmpty(parkingGarage[i]))
+        {
+            continue;
+        }
+
+        else if (parkingGarage[i].Contains(input))
+        {
+            // return (i);
+            pIndex.Add(i);
+        }
+    }
+
+    if (pIndex.Count == 0)
+    {
+        pIndex.Add(1001);
+        return (pIndex);
+    }
+    else
+    {
+        return (pIndex);
+    }
+}
 void visualiseraPhusText()
 {
 
     Console.Clear();
     int width = 160;
     int height = Console.WindowHeight;
-    Console.SetBufferSize(width, height);
     Console.SetWindowSize(width, height);
 
     int index = 0;
@@ -388,15 +450,31 @@ void optimeraMcParkering()
 }
 void flyttaFordon()
 { // Flyttar fordon manuellt från en plats till en annan.
+
     string input = taEmotRegNr();
-    List<int> index = sökaFordon(input);
-    int i = index[0];
-    if (i == 1001)
+    List<int> i = genomsökaPhus(input);
+
+    if (i[0] == 1001)
     {
         Console.WriteLine("Tyvärr finns inte fordonet i vårt system, kontrollera angivet registeringsnummer.");
+        flyttaFordon();
+    }
+    else if (i.Count > 1)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Det finns två bilar med det registreringsnumret du angav:");
+        foreach (var fordon in i)
+        {
+            Console.WriteLine(parkingGarage[fordon]);
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Var god specificera vilket av dom du eftersöker:");
+        flyttaFordon();
     }
     else
     {
+        int index = i[0];
         int platsIndex = angePPlats();
 
         if (!string.IsNullOrEmpty(parkingGarage[platsIndex]))
@@ -407,14 +485,14 @@ void flyttaFordon()
             platsIndex = angePPlats();
         }
 
-        else if (Regex.IsMatch(parkingGarage[i], "^[^|]*$")) //Om p-platsen inte innehåller 2 st MC
+        else if (Regex.IsMatch(parkingGarage[index], "^[^|]*$")) //Om p-platsen inte innehåller 2 st MC
         {
-            parkingGarage[platsIndex] = parkingGarage[i];
-            parkingGarage[i] = "";
+            parkingGarage[platsIndex] = parkingGarage[index];
+            parkingGarage[index] = "";
         }
         else // Om p-platsen innehåller 2 MC, delas dom.
         {
-            string pPlats = parkingGarage[i];
+            string pPlats = parkingGarage[index];
             string[] mcParking = pPlats.Split('|');
             foreach (var item in mcParking)
             {
@@ -424,11 +502,11 @@ void flyttaFordon()
                 }
                 if (!item.Contains(input))
                 {
-                    parkingGarage[i] = item;
+                    parkingGarage[index] = item;
                 }
             }
         }
-        Console.WriteLine($"Fordon {input} står på plats {i + 1}, och flyttas nu till p-plats {platsIndex + 1}");
+        Console.WriteLine($"Fordon {input} står på plats {index + 1}, och flyttas nu till p-plats {platsIndex + 1}");
     }
     Console.WriteLine();
     Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
@@ -460,48 +538,107 @@ void hämtaUtFordon()
   //för att sedan ange vart fordonet kan hämtas och ta bort det ur systemet. 
 
     string input = taEmotRegNr();
-    int i = sökaFordon(input);
-    if (i == 1001)
+    List<int> i = genomsökaPhus(input);
+
+    if (i[0] == 1001)
     {
+        Console.WriteLine();
         Console.WriteLine("Tyvärr finns inte fordonet i vårt system, kontrollera angivet registeringsnummer.");
+        hämtaUtFordon();
+    }
+    else if (i.Count > 1)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Det finns två bilar med det registreringsnumret du angav:");
+        foreach (var fordon in i)
+        {
+            if (Regex.IsMatch(parkingGarage[fordon], "^[^|]*$"))
+            {
+                string[] fordonID = parkingGarage[fordon].Split('#');
+                Console.WriteLine(fordonID[0] + "#" + fordonID[1]);
+            }
+            else
+            {
+                string pPlats = parkingGarage[fordon];
+                string[] mcParking = pPlats.Split('|');
+                foreach (var item in mcParking)
+                {
+                    if (item.Contains(input))
+                    {
+                        string[] fordonID = item.Split('#');
+                        Console.WriteLine(fordonID[0] + "#" + fordonID[1]);
+                    }
+
+                }
+            }
+            
+        }
+        Console.WriteLine();
+        Console.WriteLine("Var god specificera vilket av dom du eftersöker:");
+        hämtaUtFordon();
     }
     else
     {
-        string[] fordonID = parkingGarage[i].Split('#');
-       
-        try
+        int index = i[0];
+        Console.WriteLine();
+        //Console.WriteLine($"Fordonet du söker står på plats {i[0] + 1}");
+        if (Regex.IsMatch(parkingGarage[index], "^[^|]*$"))
         {
-            DateTime parkeringsStart = DateTime.ParseExact(fordonID[2], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
-            DateTime parkeringsSlut = DateTime.UtcNow;
-            TimeSpan parkeringsTid = parkeringsSlut - parkeringsStart;
-            int hours = (int)Math.Floor(parkeringsTid.TotalHours);
-            string formatteradParkeringsTid = $"{hours}:{parkeringsTid.Minutes:D2}:{parkeringsTid.Seconds:D2}";
+            string[] fordonID2 = parkingGarage[index].Split('#');
 
-            Console.WriteLine($"Du kan hämta ut {input} på plats {i + 1}. Den har varit parkerad i {formatteradParkeringsTid}");
-        }
-        catch 
-        {
-            Console.WriteLine($"Du kan hämta ut {input} på plats {i + 1}. Den har varit parkerad i mindre än en minut.");
-        }
+            try
+            {
+                DateTime parkeringsStart = DateTime.ParseExact(fordonID2[2], "yyyy-MM-dd HH:mm:ss +00:00", System.Globalization.CultureInfo.InvariantCulture);
+                DateTime parkeringsSlut = DateTime.UtcNow;
+                TimeSpan parkeringsTid = parkeringsSlut - parkeringsStart;
+                int hours = (int)Math.Floor(parkeringsTid.TotalHours);
+                string formatteradParkeringsTid = $"{hours}:{parkeringsTid.Minutes:D2}:{parkeringsTid.Seconds:D2}";
 
-        if (Regex.IsMatch(parkingGarage[i], "^[^|]*$"))
-        {
-            parkingGarage[i] = "";
+                Console.WriteLine($"Du kan hämta ut {fordonID2[0]} {fordonID2[1]} på plats {index + 1}. Den har varit parkerad i {formatteradParkeringsTid}");
+            }
+            catch
+            {
+                Console.WriteLine($"Du kan hämta ut {fordonID2[0]} {fordonID2[1]} på plats {index + 1}. Den har varit parkerad i mindre än en minut.");
+            }
+            parkingGarage[index] = "";
         }
         else
         {
-            string pPlats = parkingGarage[i];
+            string pPlats = parkingGarage[index];
             string[] mcParking = pPlats.Split('|');
             foreach (var item in mcParking)
             {
-                if (!item.Contains(input))
+                if (item.Contains(input))
                 {
-                    parkingGarage[i] = item;
+                    string[] fordonID2 = item.Split('#');
+
+                    try
+                    {
+                        DateTime parkeringsStart = DateTime.ParseExact(fordonID2[2], "yyyy-MM-dd HH:mm:ss +00:00", System.Globalization.CultureInfo.InvariantCulture);
+                        DateTime parkeringsSlut = DateTime.UtcNow;
+                        TimeSpan parkeringsTid = parkeringsSlut - parkeringsStart;
+                        int hours = (int)Math.Floor(parkeringsTid.TotalHours);
+                        string formatteradParkeringsTid = $"{hours}:{parkeringsTid.Minutes:D2}:{parkeringsTid.Seconds:D2}";
+
+                        Console.WriteLine($"Du kan hämta ut {fordonID2[0]} {fordonID2[1]} på plats {index + 1}. Den har varit parkerad i {formatteradParkeringsTid}");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"Något gick fel, var god försök igen");
+                        menyVal(menyDisplay());
+                    }
+                    
+                }
+                else
+                {
+                    parkingGarage[index] = item;
                 }
 
             }
-        }
 
+            
+        }
+        
     }
     Console.WriteLine();
     Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
@@ -511,6 +648,7 @@ void hämtaUtFordon()
 string taEmotRegNr()
 { // Ber användaren ange registreringsnummer på det fordon som eftersöks.
 
+    Console.WriteLine();
     Console.WriteLine("Ange reg nr på fordonet:");
     string input = Console.ReadLine().ToUpper().Trim();
     if (input.Length > 10)
@@ -519,39 +657,6 @@ string taEmotRegNr()
         taEmotRegNr();
     }
     return (input);
-}
-List<int> sökaFordon(string input)
-{ // Söker genom vektorn efter angivet registeringsnummer
-    List<int> pIndex = new List<int>();
-    for (int i = 0; i < parkingGarage.Length; i++)
-    {
-        if (string.IsNullOrEmpty(parkingGarage[i]))
-        {
-            continue;
-        }
-
-        else if (parkingGarage[i].Contains(input))
-        {
-            // return (i);
-            pIndex.Add(i);
-        }
-    }
-
-    if (pIndex.Count > 1)
-    {
-        pIndex.Add(1002);
-        return (pIndex);
-    }
-    else if (pIndex.Count == 1)
-    {
-        return (pIndex);
-    }
-    else
-    {
-        pIndex.Add(1001);
-        return (pIndex);
-    }
-
 }
 void sorteraFordonsTyp(string fordonInput)
 { // Sorterar fordon efter om det är en bil eller en mc. Skickar sedan vidare till parkeraBil eller parkeraMC. 
@@ -672,21 +777,7 @@ void menyVal(int valdMenyPunkt)
             break;
 
         case 4:
-            string input = taEmotRegNr();
-            int i = sökaFordon(input);
-            if (i == 1001)
-            {
-                Console.WriteLine("Tyvärr finns inte fordonet i vårt system, kontrollera angivet registeringsnummer.");
-            }
-            else
-            {
-                Console.WriteLine($"Fordonet du söker står på plats {i + 1}");
-            }
-
-            Console.WriteLine();
-            Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
-            Console.ReadKey();
-            menyVal(menyDisplay());
+            menyVal4();
             break;
         case 5:
             optimeraMcParkering();
