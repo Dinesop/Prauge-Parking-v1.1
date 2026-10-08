@@ -878,7 +878,7 @@ int menyDisplay()
         Console.WriteLine(valdMenyPunkt == 3 ? "> Hämta fordon" : "  Hämta fordon");
         Console.WriteLine(valdMenyPunkt == 4 ? "> Sök efter fordon" : "  Sök efter fordon");
         Console.WriteLine(valdMenyPunkt == 5 ? "> Optimera MC parkering" : "  Optimera MC parkering");
-        Console.WriteLine(valdMenyPunkt == 6 ? "> Parkeringshus översikt" : "  Parkeringshus översikt");
+        Console.WriteLine(valdMenyPunkt == 6 ? "> Parkeringshus översikt (helskärm rekommenderas)" : "  Parkeringshus översikt (helskärm rekommenderas)");
         Console.WriteLine(valdMenyPunkt == 7 ? "> Avsluta" : "  Avsluta");
 
         var knapp = Console.ReadKey(false);
