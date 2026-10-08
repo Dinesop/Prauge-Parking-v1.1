@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // Deklarera huvudvariabler
-string[] parkingGarage = new string [100];
+string[] parkingGarage = new string[100];
 bool powerSwitch = true;
 
 // Lista av förparkerade bilar för enklare testning av systemet.
@@ -117,6 +117,7 @@ bool powerSwitch = true;
 //parkingGarage[99] = "BIL#TOH166#2026-10-05 19:14:50";
 #endregion
 
+
 menyVal(menyDisplay());
 
 // ****************************** METODER ***************************************//
@@ -173,7 +174,7 @@ void menyVal4()
     Console.ReadKey();
     menyVal(menyDisplay());
 }
-List<int> genomsökaPhus (string input)
+List<int> genomsökaPhus(string input)
 { // Genomsöker alla p-platser efter angivet registreringsnr samt kollar efter dubletter.
 
     List<int> pIndex = new List<int>();
@@ -235,7 +236,12 @@ void visualiseraPhusText()
     {
         for (int col = 0; col < 10; col++)
         {
-            if (parkingGarage[index].Contains("|"))
+            if (string.IsNullOrEmpty(parkingGarage[index]))
+            {
+                table.UpdateCell(row, col, new Markup($" "));
+            }
+            
+            else if (parkingGarage[index].Contains("|"))
             {
                 string[] mcParking = parkingGarage[index].Split('|');
                 string[] mcID1 = mcParking[0].Split('#');
@@ -248,15 +254,11 @@ void visualiseraPhusText()
                 string[] fordonID = parkingGarage[index].Split('#');
                 table.UpdateCell(row, col, new Markup($"{fordonID[0]} {fordonID[1]}"));
             }
-
-            else
-            {
-                table.UpdateCell(row, col, new Markup($" "));
-            }
+            
             index++;
         }
     }
-   
+
     // Skriver ut tabellen i konsolfönstret
     AnsiConsole.Write(table);
 
@@ -366,27 +368,27 @@ void visualiseraPhusFärg()
         for (int col = 0; col < 10; col++)
         {
             // Kollar om p-platsen innehåller endast en MC
-            if (parkingGarage[index].Contains("MC") && Regex.IsMatch(parkingGarage[index], "^[^|]*$"))
+            if (string.IsNullOrEmpty(parkingGarage[index]))
+            {
+                table.UpdateCell(row, col, new BarChart()
+                 .HideValues()
+                 .AddItem($"", 1, Spectre.Console.Color.Green)
+                 .AddItem($"", 1, Spectre.Console.Color.Green));
+            }
+
+            else if (parkingGarage[index].Contains("MC") && Regex.IsMatch(parkingGarage[index], "^[^|]*$"))
             {
                 table.UpdateCell(row, col, new BarChart()
                 .HideValues()
                 .AddItem($"", 1, Spectre.Console.Color.Yellow));
             }
             // Kollar om p-platsen innehåller en bil eller 2 MCs.
-            else if (parkingGarage[index].Contains("BIL") || parkingGarage[index].Contains("|"))
+            else //(parkingGarage[index].Contains("BIL") || parkingGarage[index].Contains("|"))
             {
                 table.UpdateCell(row, col, new BarChart()
                  .HideValues()
                  .AddItem($"", 1, Spectre.Console.Color.Red3)
                  .AddItem($"", 1, Spectre.Console.Color.Red3));
-            }
-            // Sätter en tom p-plats till tom.
-            else
-            {
-                table.UpdateCell(row, col, new BarChart()
-                 .HideValues()
-                 .AddItem($"", 1, Spectre.Console.Color.Green)
-                 .AddItem($"", 1, Spectre.Console.Color.Green));
             }
 
             index++;
@@ -420,30 +422,35 @@ void hittaTommaPlatser()
     {
         if (string.IsNullOrEmpty(parkingGarage[i])) // Kollar om p-plats [i] är tom.
         {
-            tommaPlatser.Add(i);
+            tommaPlatser.Add(i+1); //konverterar från elementindext till platsindex.
         }
     }
     Console.Write("Tomma p-platser: ");
     foreach (var plats in tommaPlatser)
     {
-        Console.Write(plats + "; ");
+        Console.Write(plats + "; "); 
     }
 }
 void optimeraMcParkering()
 { // Söker igenom p-huset och kollar efter singelparkerade MCs och skriver ut hur de ska flyttas för optimal parkering vid behov.
-    
+
     Console.Clear();
     int counter = 0;
     int[] mcID = new int[2]; // Lagrar första och andra funna singelparkerade MCs. 
     for (int i = 0; i < parkingGarage.Length; i++)
     {
-        if (parkingGarage[i].Contains("MC") && Regex.IsMatch(parkingGarage[i], "^[^|]*$")) //Kollar om p-plats [i] innehåller endast en MC
+        if (string.IsNullOrEmpty(parkingGarage[i]))
+        {
+            continue;
+        }
+        
+        else if (parkingGarage[i].Contains("MC") && Regex.IsMatch(parkingGarage[i], "^[^|]*$")) //Kollar om p-plats [i] innehåller endast en MC
         {
             mcID[counter] = i;
             counter++;
         }
         // Om man har 2 singelparkerade MCs skrivs flyttinstruktioner ut.
-        if (counter == 2)
+        else if (counter == 2)
         {
             string[] fordonID = parkingGarage[mcID[1]].Split('#');
             Console.WriteLine($"{fordonID[0]} {fordonID[1]} står på plats {mcID[1] + 1}, och ska flyttas till p-plats {mcID[0] + 1} ");
@@ -556,6 +563,7 @@ int angePPlats()
 
     Console.WriteLine("Ange nummer på p-platsen du vill flytta fordonet till:");
     bool inputSafety = int.TryParse(Console.ReadLine(), out int platsIndex);
+    platsIndex--; // konverterar från platsindex 1-100 till elementindex 0-99
     if (inputSafety == false)
     {
         Console.WriteLine("Du angav inte ett heltal, försök igen.");
@@ -569,7 +577,7 @@ int angePPlats()
         angePPlats();
     }
 
-    return (platsIndex - 1);
+    return (platsIndex);
 }
 void hämtaUtFordon()
 { //Ber användare om regNr via "taEmotRegNr" och sedan söker reda på vektor index via "sökaFordon"
@@ -609,7 +617,7 @@ void hämtaUtFordon()
 
                 }
             }
-            
+
         }
         Console.WriteLine();
         Console.WriteLine("Var god specificera vilket av dom du eftersöker:");
@@ -665,7 +673,7 @@ void hämtaUtFordon()
                         Console.WriteLine($"Något gick fel, var god försök igen");
                         menyVal(menyDisplay());
                     }
-                    
+
                 }
                 else
                 {
@@ -674,9 +682,9 @@ void hämtaUtFordon()
 
             }
 
-            
+
         }
-        
+
     }
     Console.WriteLine();
     Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
@@ -730,7 +738,6 @@ void parkeraMc(string[] fordonID)
         {
             parkingGarage[i] = fordonID[0] + "#" + fordonID[1] + "#" + fordonID[2];
             Console.WriteLine($"Mc med regnr {fordonID[1]} är parkerad på plats nr {i + 1}");
-            Console.WriteLine($"Hela p-platsen id är {parkingGarage[i]}");
             break;
         }
         else if (parkingGarage[i].Contains("MC")) //Kollar om p-plats [i] innehåller en MC
@@ -802,7 +809,7 @@ void läggaTillFordon()
     }
     else // samma regnr återfanns
     {
-        foreach(var item in index)
+        foreach (var item in index)
         {
             string[] delatFordonInput = fordonInput.Split('#');
             string[] fordonID = parkingGarage[item].Split('#');
@@ -855,8 +862,7 @@ void menyVal(int valdMenyPunkt)
 int menyDisplay()
 { // Menydisplay
     Console.Clear();
-    int valdMenyPunkt = 1;
-
+    int valdMenyPunkt = 0;
     while (powerSwitch)
     {
         Console.Clear();
