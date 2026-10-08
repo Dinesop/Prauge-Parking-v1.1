@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 string[] parkingGarage = new string [100];
+bool powerSwitch = true;
 
 # region parkerade bilar
 parkingGarage[0] = "BIL#AHF768#2026-10-05 18:24:12";
@@ -112,6 +113,8 @@ parkingGarage[97] = "BIL#RYU669#2026-10-05 15:44:05";
 parkingGarage[98] = "BIL#OQX801#2026-10-05 03:26:19";
 parkingGarage[99] = "BIL#TOH166#2026-10-05 19:14:50";
 #endregion
+
+// unicode 2580 är en halvfull kvadrat, toppen fylld. 2588 är en helfylld kvadrat och 258C är en halvfylld kvadrat vänster sida fylld. 2590 är en halvfylld kvadrat höger sida fylld.25E7 och 25E8 är halvfyllda kvadrater med outline, 25EB är en outline kvadrat delad på mitten, 
 
 //string a = "\u2649";
 
@@ -380,13 +383,16 @@ void visualiseraPhusFärg()
             {
                 table.UpdateCell(row, col, new BarChart()
                  .HideValues()
-                 .AddItem($"", 1, Spectre.Console.Color.Green)
-                 .AddItem($"", 1, Spectre.Console.Color.Green));
+                 .AddItem($"", 1, Spectre.Console.Color.Red3)
+                 .AddItem($"", 1, Spectre.Console.Color.Red3));
             }
             // Sätter en tom p-plats till tom.
             else
             {
-                table.UpdateCell(row, col, new Markup($" "));
+                table.UpdateCell(row, col, new BarChart()
+                 .HideValues()
+                 .AddItem($"", 1, Spectre.Console.Color.Green)
+                 .AddItem($"", 1, Spectre.Console.Color.Green));
             }
 
             index++;
@@ -849,7 +855,10 @@ void menyVal(int valdMenyPunkt)
 
         case 6:
             visualiseraPhusFärg();
+            break;
 
+        case 7:
+            powerSwitch = false;
             break;
     }
 }
@@ -859,7 +868,7 @@ int menyDisplay()
   // eftersom att vi ovan states that om vald menypunkt är == 1, 2 eller 3 så har de en pil framför sig.
     Console.Clear();
     int valdMenyPunkt = 1;
-    bool powerSwitch = true;
+
     while (powerSwitch)
     {
         Console.Clear();
@@ -870,9 +879,10 @@ int menyDisplay()
         Console.WriteLine(valdMenyPunkt == 4 ? "> Sök efter fordon" : "  Sök efter fordon");
         Console.WriteLine(valdMenyPunkt == 5 ? "> Optimera MC parkering" : "  Optimera MC parkering");
         Console.WriteLine(valdMenyPunkt == 6 ? "> Parkeringshus översikt" : "  Parkeringshus översikt");
+        Console.WriteLine(valdMenyPunkt == 7 ? "> Avsluta" : "  Avsluta");
 
         var knapp = Console.ReadKey(false);
-        if (knapp.Key == ConsoleKey.DownArrow && valdMenyPunkt < 6) valdMenyPunkt++;
+        if (knapp.Key == ConsoleKey.DownArrow && valdMenyPunkt < 7) valdMenyPunkt++;
 
 
         else if (knapp.Key == ConsoleKey.UpArrow && valdMenyPunkt > 1) valdMenyPunkt--;
