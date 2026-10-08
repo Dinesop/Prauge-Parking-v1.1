@@ -389,7 +389,8 @@ void optimeraMcParkering()
 void flyttaFordon()
 { // Flyttar fordon manuellt från en plats till en annan.
     string input = taEmotRegNr();
-    int i = sökaFordon(input);
+    List<int> index = sökaFordon(input);
+    int i = index[0];
     if (i == 1001)
     {
         Console.WriteLine("Tyvärr finns inte fordonet i vårt system, kontrollera angivet registeringsnummer.");
@@ -519,20 +520,38 @@ string taEmotRegNr()
     }
     return (input);
 }
-int sökaFordon(string input)
+List<int> sökaFordon(string input)
 { // Söker genom vektorn efter angivet registeringsnummer
-
+    List<int> pIndex = new List<int>();
     for (int i = 0; i < parkingGarage.Length; i++)
     {
         if (string.IsNullOrEmpty(parkingGarage[i]))
+        {
             continue;
+        }
 
         else if (parkingGarage[i].Contains(input))
         {
-            return (i);
+            // return (i);
+            pIndex.Add(i);
         }
     }
-    return (1001);
+
+    if (pIndex.Count > 1)
+    {
+        pIndex.Add(1002);
+        return (pIndex);
+    }
+    else if (pIndex.Count == 1)
+    {
+        return (pIndex);
+    }
+    else
+    {
+        pIndex.Add(1001);
+        return (pIndex);
+    }
+
 }
 void sorteraFordonsTyp(string fordonInput)
 { // Sorterar fordon efter om det är en bil eller en mc. Skickar sedan vidare till parkeraBil eller parkeraMC. 
