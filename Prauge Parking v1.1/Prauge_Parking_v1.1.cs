@@ -14,7 +14,7 @@ bool powerSwitch = true;
 
 // Lista av förparkerade bilar för enklare testning av systemet.
 // Avkommentera för att populera p-huset.
-# region parkerade bilar
+#region parkerade bilar
 //parkingGarage[0] = "BIL#AHF768#2026-10-05 18:24:12";
 //parkingGarage[1] = "MC#KAF501#2026-10-05 14:12:05";
 //parkingGarage[2] = "BIL#OFP808#2026-10-05 20:45:30";
@@ -856,13 +856,14 @@ void menyVal(int valdMenyPunkt)
 
         case 7:
             powerSwitch = false;
+            menyVal(menyDisplay());
             break;
     }
 }
 int menyDisplay()
 { // Menydisplay
     Console.Clear();
-    int valdMenyPunkt = 0;
+    int valdMenyPunkt = 1;
     while (powerSwitch)
     {
         Console.Clear();
