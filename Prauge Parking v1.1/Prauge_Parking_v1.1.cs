@@ -15,16 +15,16 @@ bool powerSwitch = true;
 // Lista av förparkerade bilar för enklare testning av systemet.
 // Avkommentera för att populera p-huset.
 #region parkerade bilar
-//parkingGarage[0] = "BIL#AHF768#2026-10-05 18:24:12";
-//parkingGarage[1] = "MC#KAF501#2026-10-05 14:12:05";
-//parkingGarage[2] = "BIL#OFP808#2026-10-05 20:45:30";
-//parkingGarage[3] = "MC#IEY300#2026-10-05 11:33:18";
-//parkingGarage[4] = "MC#PUS593#2026-10-05 19:15:40|MC#OVQ857#2026-10-05 19:15:40";
-//parkingGarage[5] = "BIL#ABC123#2026-10-05 08:52:11";
-//parkingGarage[6] = "MC#JJF296#2026-10-05 17:04:55";
-//parkingGarage[7] = "MC#10TEECKEEN#2026-10-05 13:41:22";
-//parkingGarage[8] = "BIL#RVU203#2026-10-05 15:19:04";
-//parkingGarage[9] = "";
+parkingGarage[0] = "BIL#AHF768#2026-10-05 18:24:12";
+parkingGarage[1] = "MC#KAF501#2026-10-05 14:12:05";
+parkingGarage[2] = "BIL#OFP808#2026-10-05 20:45:30";
+parkingGarage[3] = "MC#IEY300#2026-10-05 11:33:18";
+parkingGarage[4] = "MC#PUS593#2026-10-05 19:15:40|MC#OVQ857#2026-10-05 19:15:40";
+parkingGarage[5] = "BIL#ABC123#2026-10-05 08:52:11";
+parkingGarage[6] = "MC#JJF296#2026-10-05 17:04:55";
+parkingGarage[7] = "MC#10TEECKEEN#2026-10-05 13:41:22";
+parkingGarage[8] = "BIL#RVU203#2026-10-05 15:19:04";
+parkingGarage[9] = "";
 //parkingGarage[10] = "";
 //parkingGarage[11] = "BIL#GGO258#2026-10-05 10:14:35";
 //parkingGarage[12] = "BIL#FZN001#2026-10-05 16:38:50";
@@ -117,8 +117,11 @@ bool powerSwitch = true;
 //parkingGarage[99] = "BIL#TOH166#2026-10-05 19:14:50";
 #endregion
 
-
-menyVal(menyDisplay());
+while (powerSwitch)
+{
+    int valdMenyPunkt = menyDisplay();
+    menyVal(valdMenyPunkt);
+}
 
 // ****************************** METODER ***************************************//
 void menyVal4()
@@ -172,7 +175,6 @@ void menyVal4()
     Console.WriteLine();
     Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
     Console.ReadKey();
-    menyVal(menyDisplay());
 }
 List<int> genomsökaPhus(string input)
 { // Genomsöker alla p-platser efter angivet registreringsnr samt kollar efter dubletter.
@@ -308,8 +310,6 @@ void beläggningsrapport(int[] beläggning)
         Console.WriteLine();
         Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
         Console.ReadKey();
-
-        menyVal(menyDisplay());
     }
 }
 int[] beläggningsKoll()
@@ -450,29 +450,27 @@ void optimeraMcParkering()
             counter++;
         }
         // Om man har 2 singelparkerade MCs skrivs flyttinstruktioner ut.
-        else if (counter == 2)
+        if (counter == 2)
         {
             string[] fordonID = parkingGarage[mcID[1]].Split('#');
             Console.WriteLine($"{fordonID[0]} {fordonID[1]} står på plats {mcID[1] + 1}, och ska flyttas till p-plats {mcID[0] + 1} ");
             parkingGarage[mcID[0]] = parkingGarage[mcID[0]] + "|" + parkingGarage[mcID[1]];
-            Console.WriteLine(parkingGarage[mcID[0]]);
             // Här nollställs mcID och counter för att alltid bara ha 2 MCs aktiva.
             parkingGarage[mcID[1]] = "";
-            Console.WriteLine(parkingGarage[mcID[1]]);
             counter = 0;
         }
-        else if (i == parkingGarage.Length - 1)
+        if (i == parkingGarage.Length - 1)
         {
             Console.WriteLine();
             Console.WriteLine("Alla MCs står optimalt.");
+            break;
         }
 
     }
-
     Console.WriteLine();
     Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
     Console.ReadKey();
-    menyVal(menyDisplay());
+
 }
 void flyttaFordon()
 { // Flyttar fordon manuellt från en plats till en annan.
@@ -517,7 +515,7 @@ void flyttaFordon()
         Console.WriteLine("Var god specificera vilket av dom du eftersöker:");
         flyttaFordon();
     }
-    else // Fordonet finns och saknar dubbletter, så fortsätter till att hämta ut fordonet ur systemet.
+    else // Fordonet finns och saknar dubbletter, så fortsätter till att flytta ut fordonet ur systemet.
     {
         int index = i[0];
         int platsIndex = angePPlats();
@@ -552,11 +550,10 @@ void flyttaFordon()
             }
         }
         Console.WriteLine($"Fordon {input} står på plats {index + 1}, och flyttas nu till p-plats {platsIndex + 1}");
+        Console.WriteLine();
+        Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
+        Console.ReadKey();
     }
-    Console.WriteLine();
-    Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
-    Console.ReadKey();
-    menyVal(menyDisplay());
 }
 int angePPlats()
 { // Ber användaren ange registreringsnummer på det fordon som eftersöks.
@@ -634,7 +631,7 @@ void hämtaUtFordon()
 
             try
             {
-                DateTime parkeringsStart = DateTime.ParseExact(fordonID2[2], "yyyy-MM-dd HH:mm:ss +00:00", System.Globalization.CultureInfo.InvariantCulture);
+                DateTime parkeringsStart = DateTime.ParseExact(fordonID2[2], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
                 DateTime parkeringsSlut = DateTime.UtcNow;
                 TimeSpan parkeringsTid = parkeringsSlut - parkeringsStart;
                 int hours = (int)Math.Floor(parkeringsTid.TotalHours);
@@ -689,7 +686,6 @@ void hämtaUtFordon()
     Console.WriteLine();
     Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
     Console.ReadKey();
-    menyVal(menyDisplay());
 }
 string taEmotRegNr()
 { // Ber användaren ange registreringsnummer på det fordon som eftersöks.
@@ -727,7 +723,7 @@ void sorteraFordonsTyp(string fordonInput)
     }
     else
         Console.WriteLine("Ogiltligt fordon.");
-    läggaTillFordon();
+
 }
 void parkeraMc(string[] fordonID)
 { // Letar upp första bästa parkeringsplats för en MC, antingen en tom p-plats eller en p-plats där endast en MC står parkerad.
@@ -761,7 +757,6 @@ void parkeraMc(string[] fordonID)
     Console.WriteLine();
     Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
     Console.ReadKey();
-    menyVal(menyDisplay());
 }
 void parkeraBil(string[] fordonID)
 { // Letar upp första lediga p-plats att parkera en bil på.
@@ -778,16 +773,10 @@ void parkeraBil(string[] fordonID)
         {
             Console.WriteLine("Tyvärr finns det inga lediga platser.");
         }
-        else
-        {
-            continue;
-        }
     }
     Console.WriteLine();
     Console.Write("\n\nTryck på valfri tangent för att återgå till huvudmenyn.");
     Console.ReadKey();
-
-    menyVal(menyDisplay());
 }
 void läggaTillFordon()
 { // Ber användaren ange fordonstyp och registeringsnummer för fordonet som ska parkeras. Skickar sedan vidare till sorteraFordonsTyp.
@@ -829,36 +818,36 @@ void läggaTillFordon()
 void menyVal(int valdMenyPunkt)
 { // Styr vald meny i menyDisplay till rätt program.
 
-    switch (valdMenyPunkt)
-    {
-        case 1:
-            läggaTillFordon();
-            break;
+        switch (valdMenyPunkt)
+        {
+            case 1:
+                läggaTillFordon();
+                break;
 
-        case 2:
-            flyttaFordon();
-            break;
+            case 2:
+                flyttaFordon();
+                break;
 
-        case 3:
-            hämtaUtFordon();
-            break;
+            case 3:
+                hämtaUtFordon();
+                break;
 
-        case 4:
-            menyVal4();
-            break;
-        case 5:
-            optimeraMcParkering();
-            break;
+            case 4:
+                menyVal4();
+                break;
+            case 5:
+                optimeraMcParkering();
+                break;
 
-        case 6:
-            visualiseraPhusFärg();
-            break;
+            case 6:
+                visualiseraPhusFärg();
+                break;
 
-        case 7:
-            powerSwitch = false;
-            menyVal(menyDisplay());
-            break;
-    }
+            case 7:
+                powerSwitch = false;
+                return;
+        }
+
 }
 int menyDisplay()
 { // Menydisplay
@@ -877,11 +866,11 @@ int menyDisplay()
         Console.WriteLine(valdMenyPunkt == 7 ? "> Avsluta" : "  Avsluta");
 
         var knapp = Console.ReadKey(false);
-        if (knapp.Key == ConsoleKey.DownArrow && valdMenyPunkt < 7) valdMenyPunkt++;
+    if (knapp.Key == ConsoleKey.DownArrow && valdMenyPunkt < 7) valdMenyPunkt++;
 
 
-        else if (knapp.Key == ConsoleKey.UpArrow && valdMenyPunkt > 1) valdMenyPunkt--;
-        else if (knapp.Key == ConsoleKey.Enter) break;
+    else if (knapp.Key == ConsoleKey.UpArrow && valdMenyPunkt > 1) valdMenyPunkt--;
+    else if (knapp.Key == ConsoleKey.Enter) break;
     }
 
     return (valdMenyPunkt);
