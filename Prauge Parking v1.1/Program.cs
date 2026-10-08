@@ -127,19 +127,37 @@ void menyVal4()
     string input = taEmotRegNr();
     List<int> i = genomsökaPhus(input);
 
-    if (i[0] == 1001)
+    if (i[0] == 1001) // Fordonet finns inte i systemet
     {
         Console.WriteLine();
         Console.WriteLine("Tyvärr finns inte fordonet i vårt system, kontrollera angivet registeringsnummer.");
         menyVal4();
     }
-    else if (i.Count > 1)
+    else if (i.Count > 1) // Om det finns mer än ett fordon med angivet regnr.
     {
         Console.WriteLine();
-        Console.WriteLine("Det finns två bilar med det registreringsnumret du angav:");
+        Console.WriteLine($"Det finns {i.Count} bilar med det registreringsnumret du angav:");
         foreach (var fordon in i)
         {
-            Console.WriteLine(parkingGarage[fordon]);
+            if (Regex.IsMatch(parkingGarage[fordon], "^[^|]*$")) // Det står inte 2 MC:s parkerade på p-platsen.
+            {
+                string[] fordonID = parkingGarage[fordon].Split('#');
+                Console.WriteLine(fordonID[0] + "#" + fordonID[1]);
+            }
+            else // Det står två MC:s på p-platsen.
+            {
+                string pPlats = parkingGarage[fordon];
+                string[] mcParking = pPlats.Split('|');
+                foreach (var item in mcParking)
+                {
+                    if (item.Contains(input))
+                    {
+                        string[] fordonID = item.Split('#');
+                        Console.WriteLine(fordonID[0] + "#" + fordonID[1]);
+                    }
+
+                }
+            }
         }
         Console.WriteLine();
         Console.WriteLine("Var god specificera vilket av dom du eftersöker:");
@@ -223,7 +241,7 @@ void visualiseraPhusText()
             {
                 string[] mcParking = parkingGarage[index].Split('|');
                 string[] mcID1 = mcParking[0].Split('#');
-                string[] mcID2 = mcParking[0].Split('#');
+                string[] mcID2 = mcParking[1].Split('#');
                 table.UpdateCell(row, col, new Markup($"{mcID1[0]} {mcID1[1]} \n{mcID2[0]} {mcID2[1]}"));
             }
 
@@ -321,7 +339,6 @@ void visualiseraPhusFärg()
     Console.Clear();
     int width = 160;
     int height = Console.WindowHeight;
-    Console.SetBufferSize(width, height);
     Console.SetWindowSize(width, height);
 
     int index = 0;
@@ -414,7 +431,8 @@ void hittaTommaPlatser()
 }
 void optimeraMcParkering()
 { // Söker igenom p-huset och kollar efter singelparkerade MCs och skriver ut hur de ska flyttas för optimal parkering vid behov.
-
+    
+    Console.Clear();
     int counter = 0;
     int[] mcID = new int[2]; // Lagrar första och andra funna singelparkerade MCs. 
     for (int i = 0; i < parkingGarage.Length; i++)
@@ -430,9 +448,10 @@ void optimeraMcParkering()
             string[] fordonID = parkingGarage[mcID[1]].Split('#');
             Console.WriteLine($"{fordonID[0]} {fordonID[1]} står på plats {mcID[1] + 1}, och ska flyttas till p-plats {mcID[0] + 1} ");
             parkingGarage[mcID[0]] = parkingGarage[mcID[0]] + "|" + parkingGarage[mcID[1]];
-            
+            Console.WriteLine(parkingGarage[mcID[0]]);
             // Här nollställs mcID och counter för att alltid bara ha 2 MCs aktiva.
             parkingGarage[mcID[1]] = "";
+            Console.WriteLine(parkingGarage[mcID[1]]);
             counter = 0;
         }
         else if (i == parkingGarage.Length - 1)
@@ -454,18 +473,37 @@ void flyttaFordon()
     string input = taEmotRegNr();
     List<int> i = genomsökaPhus(input);
 
-    if (i[0] == 1001)
+    if (i[0] == 1001) // Fordonet finns inte i systemet
     {
+        Console.WriteLine();
         Console.WriteLine("Tyvärr finns inte fordonet i vårt system, kontrollera angivet registeringsnummer.");
         flyttaFordon();
     }
-    else if (i.Count > 1)
+    else if (i.Count > 1) // Om det finns mer än ett fordon med angivet regnr.
     {
         Console.WriteLine();
-        Console.WriteLine("Det finns två bilar med det registreringsnumret du angav:");
+        Console.WriteLine($"Det finns {i.Count} fordon med det registreringsnumret du angav:");
         foreach (var fordon in i)
         {
-            Console.WriteLine(parkingGarage[fordon]);
+            if (Regex.IsMatch(parkingGarage[fordon], "^[^|]*$")) // Det står inte 2 MC:s parkerade på p-platsen.
+            {
+                string[] fordonID = parkingGarage[fordon].Split('#');
+                Console.WriteLine(fordonID[0] + "#" + fordonID[1]);
+            }
+            else // Det står två MC:s på p-platsen.
+            {
+                string pPlats = parkingGarage[fordon];
+                string[] mcParking = pPlats.Split('|');
+                foreach (var item in mcParking)
+                {
+                    if (item.Contains(input))
+                    {
+                        string[] fordonID = item.Split('#');
+                        Console.WriteLine(fordonID[0] + "#" + fordonID[1]);
+                    }
+
+                }
+            }
         }
 
         Console.WriteLine();
@@ -540,24 +578,24 @@ void hämtaUtFordon()
     string input = taEmotRegNr();
     List<int> i = genomsökaPhus(input);
 
-    if (i[0] == 1001)
+    if (i[0] == 1001) // Fordonet finns inte i systemet
     {
         Console.WriteLine();
         Console.WriteLine("Tyvärr finns inte fordonet i vårt system, kontrollera angivet registeringsnummer.");
         hämtaUtFordon();
     }
-    else if (i.Count > 1)
+    else if (i.Count > 1) // Om det finns mer än ett fordon med angivet regnr.
     {
         Console.WriteLine();
-        Console.WriteLine("Det finns två bilar med det registreringsnumret du angav:");
+        Console.WriteLine($"Det finns {i.Count} bilar med det registreringsnumret du angav:");
         foreach (var fordon in i)
         {
-            if (Regex.IsMatch(parkingGarage[fordon], "^[^|]*$"))
+            if (Regex.IsMatch(parkingGarage[fordon], "^[^|]*$")) // Det står inte 2 MC:s parkerade på p-platsen.
             {
                 string[] fordonID = parkingGarage[fordon].Split('#');
                 Console.WriteLine(fordonID[0] + "#" + fordonID[1]);
             }
-            else
+            else // Det står två MC:s på p-platsen.
             {
                 string pPlats = parkingGarage[fordon];
                 string[] mcParking = pPlats.Split('|');
@@ -581,8 +619,8 @@ void hämtaUtFordon()
     {
         int index = i[0];
         Console.WriteLine();
-        //Console.WriteLine($"Fordonet du söker står på plats {i[0] + 1}");
-        if (Regex.IsMatch(parkingGarage[index], "^[^|]*$"))
+
+        if (Regex.IsMatch(parkingGarage[index], "^[^|]*$")) // Om p-platsen inte innehåller 2 MCs.
         {
             string[] fordonID2 = parkingGarage[index].Split('#');
 
@@ -602,7 +640,7 @@ void hämtaUtFordon()
             }
             parkingGarage[index] = "";
         }
-        else
+        else // Om p-platsen innehåller 2 MCs.
         {
             string pPlats = parkingGarage[index];
             string[] mcParking = pPlats.Split('|');
@@ -755,9 +793,35 @@ void läggaTillFordon()
         läggaTillFordon();
     }
 
-    fordonInput = fordonInput + "#" + DateTimeOffset.UtcNow;
+    List<int> index = genomsökaPhus(fordonInput); // Kollar om något av samma fordonstyp finns registrerat redan.
+    if (index[0] == 1001)
+    {
+        fordonInput = fordonInput + "#" + DateTimeOffset.UtcNow;
+        sorteraFordonsTyp(fordonInput);
+    }
+    else
+    {
+        foreach(var item in index)
+        {
+            string[] delatFordonInput = fordonInput.Split('#');
+            string[] fordonID = parkingGarage[item].Split('#');
+            if (delatFordonInput[0] == fordonID[0])
+            {
+                Console.WriteLine($"Fordon {fordonInput} finns redan registrerad i systemet, kontrollera angivet regnr och fordonstyp och försök igen.");
+                läggaTillFordon();
+            }
+            else
+            {
+                fordonInput = fordonInput + "#" + DateTimeOffset.UtcNow;
+                sorteraFordonsTyp(fordonInput);
+            }
 
-    sorteraFordonsTyp(fordonInput);
+        }
+        
+    }
+   
+
+
 }
 void menyVal(int valdMenyPunkt)
 { // Styr vald meny i menyDisplay till rätt program.
@@ -793,7 +857,7 @@ int menyDisplay()
 { // Menyn bygger på att vilkors operatorn ? : -> b ? x : y innebär att om b är sant händer x annars händer y. 
   // Om jag trycker på nedåt tangent och valdMenyPunkt är mindre än 3, kör vi valdMenyPunkt + 1 vilket flyttar pilmarkären nedåt 
   // eftersom att vi ovan states that om vald menypunkt är == 1, 2 eller 3 så har de en pil framför sig.
-
+    Console.Clear();
     int valdMenyPunkt = 1;
     bool powerSwitch = true;
     while (powerSwitch)
